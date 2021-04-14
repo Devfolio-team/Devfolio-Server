@@ -1,4 +1,4 @@
-class ProjectDTO {
+class ProjectLikesDTO {
   constructor({ project_likes_id, user_user_id, project_project_id }) {
     this.project_likes_id = project_likes_id;
     this.user_user_id = user_user_id;
@@ -6,4 +6,4 @@ class ProjectDTO {
   }
 }
 
-module.exports = ProjectDTO;
+module.exports = ProjectLikesDTO;
