@@ -12,5 +12,6 @@ router.use('/portfolio', portfolio);
 router.use('/project', project);
 router.use('/projects', projects);
 router.use('/image', image);
+// auth라우트는 OAuth 이슈로 router객체로 모듈화를 진행하지 못함
 
 module.exports = router;
