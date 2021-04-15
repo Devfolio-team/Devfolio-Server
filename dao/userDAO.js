@@ -5,7 +5,7 @@ const { UserDTO } = require('../dto');
 const pool = mysql.createPool(dbconfig);
 
 // 일반 이메일 회원가입시 email, password, nickname을 받고 profile_photo는 클라이언트에서 랜덤 아바타를 생성하여 전송해준다.
-exports.signupEmail = async ({ email, password, name, nickname, profile_photo } = new UserDTO()) => {
+exports.signupEmail = async ({ email, password, name, nickname, profile_photo } = new UserDTO({})) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
     console.log(email, password, name, nickname, profile_photo);
@@ -28,7 +28,7 @@ exports.signupEmail = async ({ email, password, name, nickname, profile_photo } 
 };
 
 // 구글 로그인 시 받아야하는 3가지 인자를 API에서 제공받을 수 있다.
-exports.signupGoogle = async ({ email, name, profile_photo } = new UserDTO()) => {
+exports.signupGoogle = async ({ email, name, profile_photo } = new UserDTO({})) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
     try {
@@ -50,15 +50,15 @@ exports.signupGoogle = async ({ email, name, profile_photo } = new UserDTO()) =>
 };
 
 // 깃허브 로그인시 받는 4개의 인자를 모두 제공받을 수 있다.
-exports.signupGithub = async ({ email, nickname, profile_photo, github_url } = new UserDTO()) => {
+exports.signupGithub = async ({ email, name, nickname, profile_photo, github_url } = new UserDTO({})) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
     try {
       const [
         rows,
       ] = await connection.query(
-        'INSERT INTO user(email, nickname, profile_photo, created, github_url) values (?, ?, ?, now(), ?)',
-        [email, nickname, profile_photo, github_url]
+        'INSERT INTO user(email, name, nickname, profile_photo, created, github_url) values((?), (?), (?), (?), now(), (?))',
+        [email, name, nickname, profile_photo, github_url]
       );
       connection.release();
       return rows;
@@ -88,7 +88,7 @@ exports.checkExistedUser = async ({ email }) => {
   }
 };
 
-exports.signinEmail = async ({ email, password } = new UserDTO()) => {
+exports.signinEmail = async ({ email, password } = new UserDTO({})) => {
   console.log(email, password);
   try {
     const connection = await pool.getConnection(async conn => conn);

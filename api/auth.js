@@ -5,7 +5,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const jwt = require('jsonwebtoken');
 const githubAuthConfig = require('../.config/githubAuth');
 const googleAuthConfig = require('../.config/googleAuth');
-const { checkExistedUser, signupGoogle } = require('../dao/userDAO');
+const { checkExistedUser, signupGoogle, signupGithub } = require('../dao/userDAO');
 const { secretKey } = require('../.config/jwt');
 const { options } = require('../.config/jwt');
 const cookieOptions = require('../.config/cookie');
@@ -22,14 +22,6 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((user, done) => {
   done(null, user);
 });
-
-passport.use(
-  new GitHubStrategy(githubAuthConfig, (accessToken, refreshToken, profile, cb) => {
-    console.log(profile);
-    // checkExistedUser(profile);
-    cb(null, profile);
-  })
-);
 
 passport.use(
   new GoogleStrategy(googleAuthConfig, async (accessToken, refreshToken, profile, cb) => {
@@ -63,6 +55,15 @@ app.get(
   }
 );
 
+passport.use(
+  new GitHubStrategy(githubAuthConfig, async (accessToken, refreshToken, profile, cb) => {
+    // Github는 email을 고유한 아이디로 사용하지 않기 때문에 node_id를 애플리케이션의 id인 email값으로 사용
+    const [currentUser] = await checkExistedUser({ email: profile._json.node_id });
+    if (currentUser) return cb(null, { isExisted: true, currentUser });
+    return cb(null, { isExisted: false, profile });
+  })
+);
+
 app.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
 
 app.get(
@@ -70,8 +71,31 @@ app.get(
   passport.authenticate('github', {
     failureRedirect: 'http://localhost:3000/signin_error',
   }),
-  (req, res) => {
-    console.log(req);
+  async (req, res) => {
+    if (req.user.isExisted) {
+      const { name, email } = req.user.currentUser;
+      const token = jwt.sign({ email, name }, secretKey, options);
+
+      res.cookie('auth_token', token, cookieOptions);
+    } else {
+      const {
+        login: name,
+        name: nickname,
+        avatar_url: profile_photo,
+        node_id: email,
+        html_url: github_url,
+      } = req.user.profile._json;
+
+      const signupResult = await signupGithub({ email, name, nickname, profile_photo, github_url });
+
+      if (signupResult.affectedRows) {
+        const token = jwt.sign({ email, name }, secretKey, options);
+
+        res.cookie('auth_token', token, cookieOptions);
+      } else {
+        return res.redirect('http://localhost:3000/signup_error');
+      }
+    }
     res.redirect('http://localhost:3000');
   }
 );
