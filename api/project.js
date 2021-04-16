@@ -1,5 +1,5 @@
 const express = require('express');
-const { fetchProjects } = require('../dao/projectDAO');
+const { fetchProjects, createProject } = require('../dao/projectDAO');
 
 const router = express.Router();
 
@@ -10,6 +10,11 @@ router.get('/', async (req, res) => {
   } catch (error) {
     res.status(500).json({ responseMessage: 'failure', error });
   }
+});
+
+router.post('/', async (req, res) => {
+  const result = await createProject(req.body);
+  res.send(result);
 });
 
 module.exports = router;
