@@ -39,6 +39,27 @@ exports.getAuthorInfo = async userId => {
   }
 };
 
+exports.getProjectLikeCount = async projectId => {
+  try {
+    const connection = await pool.getConnection(async conn => conn);
+    try {
+      const [
+        rows,
+      ] = await connection.query(
+        'SELECT count(project_likes_id) as likeCount FROM project_likes WHERE project_project_id = (?)',
+        [projectId]
+      );
+      connection.release();
+      return rows;
+    } catch (err) {
+      connection.release();
+      return 'Query Error';
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 exports.createProject = async ({
   subject,
   thumbnail,
