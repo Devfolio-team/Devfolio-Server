@@ -35,8 +35,8 @@ exports.signupGoogle = async ({ email, name, profile_photo } = new UserDTO({})) 
       const [
         rows,
       ] = await connection.query(
-        'INSERT INTO user(email, name, profile_photo, created) values (?, ?, ?, now())',
-        [email, name, profile_photo]
+        'INSERT INTO user(email, name, nickname, profile_photo, created) value((?), (?), (?), (?), now())',
+        [email, name, name, profile_photo]
       );
       connection.release();
       return rows;
@@ -50,15 +50,15 @@ exports.signupGoogle = async ({ email, name, profile_photo } = new UserDTO({})) 
 };
 
 // 깃허브 로그인시 받는 4개의 인자를 모두 제공받을 수 있다.
-exports.signupGithub = async ({ email, name, nickname, profile_photo, github_url } = new UserDTO({})) => {
+exports.signupGithub = async ({ name, profile_photo, github_url } = new UserDTO({})) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
     try {
       const [
         rows,
       ] = await connection.query(
-        'INSERT INTO user(email, name, nickname, profile_photo, created, github_url) values((?), (?), (?), (?), now(), (?))',
-        [email, name, nickname, profile_photo, github_url]
+        'INSERT INTO user(name, nickname, profile_photo, created, github_url) values((?), (?), (?), now(), (?))',
+        [name, name, profile_photo, github_url]
       );
       connection.release();
       return rows;

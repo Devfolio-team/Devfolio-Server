@@ -21,6 +21,24 @@ exports.fetchProjects = async () => {
   }
 };
 
+exports.getAuthorInfo = async userId => {
+  try {
+    const connection = await pool.getConnection(async conn => conn);
+    try {
+      const [rows] = await connection.query('SELECT nickname, profile_photo FROM user WHERE user_id = (?)', [
+        userId,
+      ]);
+      connection.release();
+      return rows;
+    } catch (err) {
+      connection.release();
+      return 'Query Error';
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 exports.createProject = async ({
   subject,
   thumbnail,

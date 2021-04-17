@@ -78,18 +78,12 @@ app.get(
 
       res.cookie('auth_token', token, cookieOptions);
     } else {
-      const {
-        login: name,
-        name: nickname,
-        avatar_url: profile_photo,
-        node_id: email,
-        html_url: github_url,
-      } = req.user.profile._json;
+      const { login: name, avatar_url: profile_photo, html_url: github_url } = req.user.profile._json;
 
-      const signupResult = await signupGithub({ email, name, nickname, profile_photo, github_url });
+      const signupResult = await signupGithub({ name, profile_photo, github_url });
 
       if (signupResult.affectedRows) {
-        const token = jwt.sign({ email, name }, secretKey, options);
+        const token = jwt.sign({ name }, secretKey, options);
 
         res.cookie('auth_token', token, cookieOptions);
       } else {
