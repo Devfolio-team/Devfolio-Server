@@ -35,7 +35,7 @@ app.get('/google', passport.authenticate('google', { scope: ['profile', 'email']
 
 app.get(
   '/google/callback',
-  passport.authenticate('google', { failureRedirect: 'http://localhost:3000/signin_error' }),
+  passport.authenticate('google', { failureRedirect: 'http://devfolio.world:3000/signin_error' }),
   async (req, res) => {
     if (req.user.isExisted) {
       const { name, email } = req.user.currentUser;
@@ -48,10 +48,10 @@ app.get(
         const token = jwt.sign({ email, name }, secretKey, options);
         res.cookie('auth_token', token, cookieOptions);
       } else {
-        return res.redirect('http://localhost:3000/signup_error');
+        return res.redirect('http://devfolio.world:3000/signup_error');
       }
     }
-    res.redirect('http://localhost:3000');
+    res.redirect('http://devfolio.world:3000');
   }
 );
 
