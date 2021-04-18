@@ -5,7 +5,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const jwt = require('jsonwebtoken');
 const githubAuthConfig = require('../.config/githubAuth');
 const googleAuthConfig = require('../.config/googleAuth');
-const { checkExistedUser, signupGoogle, signupGithub } = require('../dao/userDAO');
+const { checkExistedUser, signupGoogle, signupGithub, signIn } = require('../dao/userDAO');
 const { secretKey } = require('../.config/jwt');
 const { options } = require('../.config/jwt');
 const cookieOptions = require('../.config/cookie');
@@ -26,7 +26,9 @@ passport.deserializeUser((user, done) => {
 passport.use(
   new GoogleStrategy(googleAuthConfig, async (accessToken, refreshToken, profile, cb) => {
     const [currentUser] = await checkExistedUser(profile._json);
+
     if (currentUser) return cb(null, { isExisted: true, currentUser });
+
     return cb(null, { isExisted: false, profile });
   })
 );
@@ -35,23 +37,24 @@ app.get('/google', passport.authenticate('google', { scope: ['profile', 'email']
 
 app.get(
   '/google/callback',
-  passport.authenticate('google', { failureRedirect: 'http://devfolio.world:3000/signin_error' }),
+  passport.authenticate('google', { failureRedirect: 'http://localhost:3000/signin_error' }),
   async (req, res) => {
     if (req.user.isExisted) {
-      const { name, email } = req.user.currentUser;
-      const token = jwt.sign({ email, name }, secretKey, options);
+      const { user_id, name, email } = req.user.currentUser;
+      const token = jwt.sign({ user_id, email, name, type: 'google' }, secretKey, options);
       res.cookie('auth_token', token, cookieOptions);
     } else {
       const { name, picture: profile_photo, email } = req.user.profile._json;
       const signupResult = await signupGoogle({ email, name, profile_photo });
       if (signupResult.affectedRows) {
-        const token = jwt.sign({ email, name }, secretKey, options);
+        const user_id = signupResult.insertId;
+        const token = jwt.sign({ user_id, email, name, type: 'google' }, secretKey, options);
         res.cookie('auth_token', token, cookieOptions);
       } else {
-        return res.redirect('http://devfolio.world:3000/signup_error');
+        return res.redirect('http://localhost:3000/signup_error');
       }
     }
-    res.redirect('http://devfolio.world:3000');
+    res.redirect('http://localhost:3000/sign_in');
   }
 );
 
@@ -73,8 +76,8 @@ app.get(
   }),
   async (req, res) => {
     if (req.user.isExisted) {
-      const { name, email } = req.user.currentUser;
-      const token = jwt.sign({ email, name }, secretKey, options);
+      const { user_id, name } = req.user.currentUser;
+      const token = jwt.sign({ user_id, name, type: 'github' }, secretKey, options);
 
       res.cookie('auth_token', token, cookieOptions);
     } else {
@@ -83,15 +86,29 @@ app.get(
       const signupResult = await signupGithub({ name, profile_photo, github_url });
 
       if (signupResult.affectedRows) {
-        const token = jwt.sign({ name }, secretKey, options);
+        const user_id = signupResult.insertId;
+        const token = jwt.sign({ user_id, name, type: 'github' }, secretKey, options);
 
         res.cookie('auth_token', token, cookieOptions);
       } else {
         return res.redirect('http://localhost:3000/signup_error');
       }
     }
-    res.redirect('http://localhost:3000');
+    res.redirect('http://localhost:3000/sign_in');
   }
 );
+
+app.post('/signin', (req, res) => {
+  const { authentication } = req.body;
+  jwt.verify(authentication, secretKey, async (err, decoded) => {
+    try {
+      const [currentUser] = await signIn(decoded);
+      console.log({ responseMessage: 'success', currentUser });
+      res.status(200).json({ responseMessage: 'success', currentUser });
+    } catch (error) {
+      res.status(500).json({ responseMessage: 'failure', error });
+    }
+  });
+});
 
 module.exports = app;

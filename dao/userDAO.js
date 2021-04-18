@@ -88,15 +88,11 @@ exports.checkExistedUser = async ({ email }) => {
   }
 };
 
-exports.signinEmail = async ({ email, password } = new UserDTO({})) => {
-  console.log(email, password);
+exports.signIn = async ({ user_id } = new UserDTO({})) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
     try {
-      const [rows] = await connection.query('SELECT * FROM user WHERE email = (?) and password = (?)', [
-        email,
-        password,
-      ]);
+      const [rows] = await connection.query('SELECT * FROM user WHERE user_id = (?)', [user_id]);
       connection.release();
       return rows;
     } catch (err) {
