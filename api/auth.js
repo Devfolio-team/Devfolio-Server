@@ -9,6 +9,7 @@ const { checkExistedUser, signupGoogle, signupGithub, signIn } = require('../dao
 const { secretKey } = require('../.config/jwt');
 const { options } = require('../.config/jwt');
 const cookieOptions = require('../.config/cookie');
+const APPLICATION_URL = require('../.config/url');
 
 const app = express();
 
@@ -37,7 +38,7 @@ app.get('/google', passport.authenticate('google', { scope: ['profile', 'email']
 
 app.get(
   '/google/callback',
-  passport.authenticate('google', { failureRedirect: 'http://localhost:3000/signin_error' }),
+  passport.authenticate('google', { failureRedirect: `${APPLICATION_URL}/signin_error` }),
   async (req, res) => {
     if (req.user.isExisted) {
       const { user_id, name, email } = req.user.currentUser;
@@ -51,10 +52,10 @@ app.get(
         const token = jwt.sign({ user_id, email, name, type: 'google' }, secretKey, options);
         res.cookie('auth_token', token, cookieOptions);
       } else {
-        return res.redirect('http://localhost:3000/signup_error');
+        return res.redirect(`${APPLICATION_URL}/signup_error`);
       }
     }
-    res.redirect('http://localhost:3000/sign_in');
+    res.redirect(`${APPLICATION_URL}/sign_in`);
   }
 );
 
@@ -72,7 +73,7 @@ app.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
 app.get(
   '/github/callback',
   passport.authenticate('github', {
-    failureRedirect: 'http://localhost:3000/signin_error',
+    failureRedirect: `${APPLICATION_URL}/signin_error`,
   }),
   async (req, res) => {
     if (req.user.isExisted) {
@@ -91,10 +92,10 @@ app.get(
 
         res.cookie('auth_token', token, cookieOptions);
       } else {
-        return res.redirect('http://localhost:3000/signup_error');
+        return res.redirect(`${APPLICATION_URL}/signup_error`);
       }
     }
-    res.redirect('http://localhost:3000/sign_in');
+    res.redirect(`${APPLICATION_URL}/sign_in`);
   }
 );
 

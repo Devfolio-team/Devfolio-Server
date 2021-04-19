@@ -1,8 +1,6 @@
 const mysql = require('mysql2/promise');
 const dbconfig = require('../.config/database');
 
-const ProjectDTO = require('../dto/ProjectDTO');
-
 const pool = mysql.createPool(dbconfig);
 
 exports.fetchProjects = async () => {
