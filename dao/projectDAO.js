@@ -71,7 +71,6 @@ exports.createProject = async ({
   deployUrl,
   isPrivate,
   mainContents,
-  author,
   userUserId,
   techStacks,
   teamMembers,
@@ -92,9 +91,8 @@ exports.createProject = async ({
           is_private,
           main_contents,
           created,
-          author,
           user_user_id
-          ) values((?), (?), (?), (?), (?), (?), (?), (?), (?), (?), now(), (?), (?))`,
+          ) values((?), (?), (?), (?), (?), (?), (?), (?), (?), (?), now(), (?))`,
         [
           subject,
           thumbnail,
@@ -106,7 +104,6 @@ exports.createProject = async ({
           deployUrl,
           isPrivate,
           mainContents,
-          author,
           userUserId,
         ]
       );
