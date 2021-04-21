@@ -156,27 +156,27 @@ exports.createProject = async ({
           );
         } catch (error) {
           connection.release();
-          return 'Query Error';
+          return 'project_tech_stacks Query Error';
         }
-        try {
-          const teamMembersQuery = teamMembers
-            // team_members는 배열로 넘어와야하고 member는 배열내에 존재하는 객체이다. 프로퍼티는 아래와 같이 2가지를 가지고 있어야한다.
-            .map(member => `,('${member.memberName}', '${member.memberGithubUrl}',${insertId})`)
-            .join('')
-            .slice(1);
-          await connection.query(
-            `INSERT INTO project_team_members(member_name, member_github_url, project_project_id) values ${teamMembersQuery}`
-          );
-        } catch (error) {
-          connection.release();
-          return 'Query Error';
-        }
+        // try {
+        //   const teamMembersQuery = teamMembers
+        //     // team_members는 배열로 넘어와야하고 member는 배열내에 존재하는 객체이다. 프로퍼티는 아래와 같이 2가지를 가지고 있어야한다.
+        //     .map(member => `,('${member.memberName}', '${member.memberGithubUrl}',${insertId})`)
+        //     .join('')
+        //     .slice(1);
+        //   await connection.query(
+        //     `INSERT INTO project_team_members(member_name, member_github_url, project_project_id) values ${teamMembersQuery}`
+        //   );
+        // } catch (error) {
+        //   connection.release();
+        //   return 'team_members Query Error';
+        // }
       }
       connection.release();
       return rows;
     } catch (err) {
       connection.release();
-      return 'Query Error';
+      return 'Project Insert Query Error';
     }
   } catch (error) {
     console.error(error);
