@@ -19,6 +19,22 @@ exports.fetchProjects = async () => {
   }
 };
 
+exports.getProject = async project_id => {
+  try {
+    const connection = await pool.getConnection(async conn => conn);
+    try {
+      const [rows] = await connection.query('SELECT * FROM project WHERE project_id = (?)', [project_id]);
+      connection.release();
+      return rows;
+    } catch (err) {
+      connection.release();
+      return 'Query Error';
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 exports.getAuthorInfo = async userId => {
   try {
     const connection = await pool.getConnection(async conn => conn);
