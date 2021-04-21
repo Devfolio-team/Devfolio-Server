@@ -1,8 +1,6 @@
 const mysql = require('mysql2/promise');
 const dbconfig = require('../.config/database');
 
-const TechStacksDTO = require('../dto/TechStacksDTO');
-
 const pool = mysql.createPool(dbconfig);
 
 exports.fetchTechStacks = async () => {
