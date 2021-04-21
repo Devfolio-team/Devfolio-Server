@@ -3,11 +3,12 @@ const dbconfig = require('../.config/database');
 
 const pool = mysql.createPool(dbconfig);
 
+// 기본 불러오기는 내림차순
 exports.fetchProjects = async () => {
   try {
     const connection = await pool.getConnection(async conn => conn);
     try {
-      const [rows] = await connection.query('SELECT * FROM project');
+      const [rows] = await connection.query('SELECT * FROM project ORDER BY project_id desc');
       connection.release();
       return rows;
     } catch (err) {
