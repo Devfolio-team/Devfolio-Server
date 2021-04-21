@@ -108,7 +108,7 @@ exports.createProject = async ({
   mainContents,
   userUserId,
   techStacks,
-  teamMembers,
+  // teamMembers,
 }) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
@@ -146,17 +146,20 @@ exports.createProject = async ({
       const { affectedRows, insertId, serverStatus } = rows;
 
       if (affectedRows && serverStatus === 2) {
-        try {
-          const techStacksQuery = techStacks
-            .map(techStack => `,('${techStack}',${insertId})`)
-            .join('')
-            .slice(1);
-          await connection.query(
-            `INSERT INTO project_tech_stacks(tech_name, project_project_id) values ${techStacksQuery}`
-          );
-        } catch (error) {
-          connection.release();
-          return 'project_tech_stacks Query Error';
+        if (techStacks[0]) {
+          try {
+            const techStacksQuery = techStacks
+              .map(techStack => `,('${techStack}',${insertId})`)
+              .join('')
+              .slice(1);
+            console.log(techStacksQuery);
+            await connection.query(
+              `INSERT INTO project_tech_stacks(tech_name, project_project_id) values ${techStacksQuery}`
+            );
+          } catch (error) {
+            connection.release();
+            return 'project_tech_stacks Query Error';
+          }
         }
         // try {
         //   const teamMembersQuery = teamMembers
