@@ -1,14 +1,26 @@
 const express = require('express');
-const { createProject, getProject } = require('../dao/projectDAO');
+const { createProject, getProject, getProjectTechStacks } = require('../dao/projectDAO');
 
 const router = express.Router();
 
 router.get('/:project_id', async (req, res) => {
   const { project_id } = req.params;
+
+  let projectPageData = null;
+
   try {
     const [projectData] = await getProject(project_id);
-
-    res.status(200).json({ responseMessage: 'success', responseData: projectData || null });
+    projectPageData = { projectData };
+    try {
+      const projectTechStacks = await getProjectTechStacks(project_id);
+      projectPageData = { ...projectPageData, projectTechStacks };
+      res.status(200).json({
+        responseMessage: 'success',
+        responseData: projectPageData.projectData ? projectPageData : null,
+      });
+    } catch (error) {
+      res.status(500).json({ responseMessage: 'failure', responseData: null });
+    }
   } catch (error) {
     res.status(500).json({ responseMessage: 'failure', responseData: null });
   }

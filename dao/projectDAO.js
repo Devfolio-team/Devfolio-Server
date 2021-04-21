@@ -53,6 +53,26 @@ exports.getAuthorInfo = async userId => {
   }
 };
 
+exports.getProjectTechStacks = async projectId => {
+  try {
+    const connection = await pool.getConnection(async conn => conn);
+    try {
+      const [
+        rows,
+      ] = await connection.query('SELECT * FROM project_tech_stacks WHERE project_project_id = (?)', [
+        projectId,
+      ]);
+      connection.release();
+      return rows;
+    } catch (err) {
+      connection.release();
+      return 'Query Error';
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 exports.getProjectLikeCount = async projectId => {
   try {
     const connection = await pool.getConnection(async conn => conn);
