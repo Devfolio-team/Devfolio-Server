@@ -88,7 +88,7 @@ exports.checkExistedUser = async ({ email }) => {
   }
 };
 
-exports.signIn = async ({ user_id } = new UserDTO({})) => {
+exports.getUserInfo = async ({ user_id } = new UserDTO({})) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
     try {

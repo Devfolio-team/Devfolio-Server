@@ -5,7 +5,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const jwt = require('jsonwebtoken');
 const githubAuthConfig = require('../.config/githubAuth');
 const googleAuthConfig = require('../.config/googleAuth');
-const { checkExistedUser, signupGoogle, signupGithub, signIn } = require('../dao/userDAO');
+const { checkExistedUser, signupGoogle, signupGithub, getUserInfo } = require('../dao/userDAO');
 const { secretKey } = require('../.config/jwt');
 const { options } = require('../.config/jwt');
 const cookieOptions = require('../.config/cookie');
@@ -103,7 +103,7 @@ app.post('/signin', (req, res) => {
   const { authentication } = req.body;
   jwt.verify(authentication, secretKey, async (err, decoded) => {
     try {
-      const [currentUser] = await signIn(decoded);
+      const [currentUser] = await getUserInfo(decoded);
       console.log({ responseMessage: 'success', currentUser });
       res.status(200).json({ responseMessage: 'success', currentUser });
     } catch (error) {
