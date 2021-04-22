@@ -10,6 +10,15 @@ router.get('/', async (req, res) => {
   try {
     const [user] = await getUserInfo(req.query);
     portfolioPageData = { user };
+
+    if (!user) {
+      res.status(400).json({
+        responseMessage: 'failure',
+        responseData: 'The user with the requested id does not exist.',
+      });
+      return;
+    }
+
     try {
       const skills = await getSkillsFromSpecificUser(req.query);
       portfolioPageData = { ...portfolioPageData, skills };
@@ -19,14 +28,9 @@ router.get('/', async (req, res) => {
 
         portfolioPageData = { ...portfolioPageData, projects };
 
-        console.log(portfolioPageData);
-
         res.status(200).json({
           responseMessage: 'success',
-          responseData:
-            portfolioPageData.projects[0] && portfolioPageData.skills[0] && portfolioPageData.user
-              ? portfolioPageData
-              : null,
+          responseData: portfolioPageData.user ? portfolioPageData : null,
         });
       } catch (error) {
         res.status(500).json({ responseMessage: 'failure', responseData: error });
