@@ -97,7 +97,7 @@ exports.getProjectLikeCount = async projectId => {
 
 exports.createProject = async ({
   subject,
-  thumbnail,
+  thumbnail: { src },
   teamName,
   planIntention,
   startDate,
@@ -130,7 +130,7 @@ exports.createProject = async ({
           ) values((?), (?), (?), (?), (?), (?), (?), (?), (?), (?), now(), (?))`,
         [
           subject,
-          thumbnail,
+          src,
           teamName,
           planIntention,
           startDate,
