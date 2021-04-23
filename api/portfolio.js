@@ -1,5 +1,6 @@
 const express = require('express');
 const { getProjectsFromSpecificUser, getSkillsFromSpecificUser } = require('../dao/portfolioDAO');
+const { getAuthorInfo, getProjectLikeCount } = require('../dao/projectDAO');
 const { getUserInfo } = require('../dao/userDAO');
 
 const router = express.Router();
@@ -24,7 +25,16 @@ router.get('/', async (req, res) => {
       portfolioPageData = { ...portfolioPageData, skills };
 
       try {
-        const projects = await getProjectsFromSpecificUser(req.query);
+        const projectsData = await getProjectsFromSpecificUser(req.query);
+
+        const projects = await Promise.all(
+          projectsData.map(async project => {
+            const [authorInfo] = await getAuthorInfo(project.user_user_id);
+            const [{ likeCount }] = await getProjectLikeCount(project.project_id);
+            const { nickname, profile_photo } = authorInfo;
+            return { ...project, nickname, profile_photo, likeCount };
+          })
+        );
 
         portfolioPageData = { ...portfolioPageData, projects };
 
