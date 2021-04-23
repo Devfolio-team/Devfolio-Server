@@ -14,6 +14,7 @@ router.post('/', (req, res) => {
 
   try {
     form.parse(req, (err, fields, files) => {
+      const { size, type } = files.image;
       if (err) res.status(500).send('Faild');
       const params = {
         Bucket: 'aws-devfolio',
@@ -28,6 +29,8 @@ router.post('/', (req, res) => {
           res.status(201).json({
             src: data.Location,
             alt: data.Key,
+            size,
+            type,
           });
         }
       });
