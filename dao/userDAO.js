@@ -8,7 +8,6 @@ const pool = mysql.createPool(dbconfig);
 exports.signupEmail = async ({ email, password, name, nickname, profile_photo } = new UserDTO({})) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
-    console.log(email, password, name, nickname, profile_photo);
     try {
       const [
         rows,
@@ -50,7 +49,7 @@ exports.signupGoogle = async ({ email, name, profile_photo } = new UserDTO({})) 
 };
 
 // 깃허브 로그인시 받는 4개의 인자를 모두 제공받을 수 있다.
-exports.signupGithub = async ({ name, profile_photo, github_url } = new UserDTO({})) => {
+exports.signupGithub = async ({ name, nickname, profile_photo, github_url } = new UserDTO({})) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
     try {
@@ -58,7 +57,7 @@ exports.signupGithub = async ({ name, profile_photo, github_url } = new UserDTO(
         rows,
       ] = await connection.query(
         'INSERT INTO user(name, nickname, profile_photo, created, github_url) values((?), (?), (?), now(), (?))',
-        [name, name, profile_photo, github_url]
+        [name, nickname, profile_photo, github_url]
       );
       connection.release();
       return rows;

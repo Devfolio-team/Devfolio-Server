@@ -152,7 +152,7 @@ exports.createProject = async ({
               .map(techStack => `,('${techStack}',${insertId})`)
               .join('')
               .slice(1);
-            console.log(techStacksQuery);
+
             await connection.query(
               `INSERT INTO project_tech_stacks(tech_name, project_project_id) values ${techStacksQuery}`
             );

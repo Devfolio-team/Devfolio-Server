@@ -45,7 +45,10 @@ app.get(
       const token = jwt.sign({ user_id, email, name, type: 'google' }, secretKey, options);
       res.cookie('auth_token', token, cookieOptions);
     } else {
-      const { name, picture: profile_photo, email } = req.user.profile._json;
+      const { name, picture, email } = req.user.profile._json;
+
+      const profile_photo = picture.replace('s96-c', 's350-c');
+
       const signupResult = await signupGoogle({ email, name, profile_photo });
       if (signupResult.affectedRows) {
         const user_id = signupResult.insertId;
@@ -82,9 +85,19 @@ app.get(
 
       res.cookie('auth_token', token, cookieOptions);
     } else {
-      const { login: name, avatar_url: profile_photo, html_url: github_url } = req.user.profile._json;
+      const {
+        login: name,
+        avatar_url: profile_photo,
+        html_url: github_url,
+        name: nickname,
+      } = req.user.profile._json;
 
-      const signupResult = await signupGithub({ name, profile_photo, github_url });
+      const signupResult = await signupGithub({
+        name,
+        profile_photo,
+        github_url,
+        nickname: nickname || name,
+      });
 
       if (signupResult.affectedRows) {
         const user_id = signupResult.insertId;
@@ -104,7 +117,7 @@ app.post('/signin', (req, res) => {
   jwt.verify(authentication, secretKey, async (err, decoded) => {
     try {
       const [currentUser] = await getUserInfo(decoded);
-      console.log({ responseMessage: 'success', currentUser });
+
       res.status(200).json({ responseMessage: 'success', currentUser });
     } catch (error) {
       res.status(500).json({ responseMessage: 'failure', error });

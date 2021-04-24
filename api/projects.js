@@ -18,7 +18,6 @@ router.get('/', async (req, res) => {
 
     res.status(200).json({ responseMessage: 'success', projectsData });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ responseMessage: 'failure', error });
   }
 });
