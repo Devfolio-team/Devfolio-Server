@@ -26,7 +26,8 @@ passport.deserializeUser((user, done) => {
 
 passport.use(
   new GoogleStrategy(googleAuthConfig, async (accessToken, refreshToken, profile, cb) => {
-    const [currentUser] = await checkExistedUser(profile._json);
+    const { sub, email } = profile._json;
+    const [currentUser] = await checkExistedUser(sub + email);
 
     if (currentUser) return cb(null, { isExisted: true, currentUser });
 
@@ -45,11 +46,11 @@ app.get(
       const token = jwt.sign({ user_id, email, name, type: 'google' }, secretKey, options);
       res.cookie('auth_token', token, cookieOptions);
     } else {
-      const { name, picture, email } = req.user.profile._json;
+      const { name, picture, email, sub } = req.user.profile._json;
 
       const profile_photo = picture.replace('s96-c', 's350-c');
 
-      const signupResult = await signupGoogle({ email, name, profile_photo });
+      const signupResult = await signupGoogle({ email, sub, name, profile_photo });
       if (signupResult.affectedRows) {
         const user_id = signupResult.insertId;
         const token = jwt.sign({ user_id, email, name, type: 'google' }, secretKey, options);
@@ -64,8 +65,8 @@ app.get(
 
 passport.use(
   new GitHubStrategy(githubAuthConfig, async (accessToken, refreshToken, profile, cb) => {
-    // Github는 email을 고유한 아이디로 사용하지 않기 때문에 node_id를 애플리케이션의 id인 email값으로 사용
-    const [currentUser] = await checkExistedUser({ email: profile._json.node_id });
+    const { node_id, id } = profile._json;
+    const [currentUser] = await checkExistedUser(node_id + id);
     if (currentUser) return cb(null, { isExisted: true, currentUser });
     return cb(null, { isExisted: false, profile });
   })
@@ -90,6 +91,8 @@ app.get(
         avatar_url: profile_photo,
         html_url: github_url,
         name: nickname,
+        node_id,
+        id,
       } = req.user.profile._json;
 
       const signupResult = await signupGithub({
@@ -97,6 +100,7 @@ app.get(
         profile_photo,
         github_url,
         nickname: nickname || name,
+        unique_id: node_id + id,
       });
 
       if (signupResult.affectedRows) {
