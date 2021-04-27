@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const githubAuthConfig = require('../.config/githubAuth');
 const googleAuthConfig = require('../.config/googleAuth');
 const { checkExistedUser, signupGoogle, signupGithub, getUserInfo } = require('../dao/userDAO');
+const { getSkillsFromSpecificUser } = require('../dao/portfolioDAO');
 const { secretKey } = require('../.config/jwt');
 const { options } = require('../.config/jwt');
 const cookieOptions = require('../.config/cookie');
@@ -122,7 +123,11 @@ app.post('/signin', (req, res) => {
     try {
       const [currentUser] = await getUserInfo(decoded);
 
-      res.status(200).json({ responseMessage: 'success', currentUser });
+      const currentUsersSkills = await getSkillsFromSpecificUser(decoded);
+
+      res
+        .status(200)
+        .json({ responseMessage: 'success', currentUser: { ...currentUser, currentUsersSkills } });
     } catch (error) {
       res.status(500).json({ responseMessage: 'failure', error });
     }
