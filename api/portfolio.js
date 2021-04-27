@@ -1,7 +1,12 @@
 const express = require('express');
-const { getProjectsFromSpecificUser, getSkillsFromSpecificUser } = require('../dao/portfolioDAO');
+const {
+  getProjectsFromSpecificUser,
+  getSkillsFromSpecificUser,
+  deleteSkillsFromSpecificUser,
+  createSkillsToSpecificUser,
+} = require('../dao/portfolioDAO');
 const { getAuthorInfo, getProjectLikeCount } = require('../dao/projectDAO');
-const { getUserInfo } = require('../dao/userDAO');
+const { getUserInfo, updateUserInfo } = require('../dao/userDAO');
 
 const router = express.Router();
 
@@ -13,11 +18,10 @@ router.get('/', async (req, res) => {
     portfolioPageData = { user };
 
     if (!user) {
-      res.status(400).json({
+      return res.status(400).json({
         responseMessage: 'failure',
         responseData: 'The user with the requested id does not exist.',
       });
-      return;
     }
 
     try {
@@ -50,6 +54,49 @@ router.get('/', async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ responseMessage: 'failure', responseData: error });
+  }
+});
+
+router.patch('/', async (req, res) => {
+  const { user_id } = req.query;
+
+  try {
+    const updateResult = await updateUserInfo({ ...req.body, user_id });
+
+    if (!updateResult.affectedRows) {
+      res.status(400).json({
+        responseMessage: 'failure',
+        responseData: 'The user with the requested id does not exist.',
+      });
+      return;
+    }
+
+    try {
+      const { serverStatus } = await deleteSkillsFromSpecificUser(req.query);
+
+      if (serverStatus === 2) {
+        try {
+          await createSkillsToSpecificUser({ ...req.body, user_id });
+
+          const currentUser = await getUserInfo(req.query);
+          const currentUsersSkills = await getSkillsFromSpecificUser(req.query);
+
+          console.log(currentUsersSkills);
+
+          return res.status(200).json({
+            responseMessage: 'success',
+            currentUser: { ...currentUser, currentUsersSkills },
+          });
+        } catch (error) {
+          return res.status(500).json({ responseMessage: 'failure', responseData: error });
+        }
+      }
+      return res.status(500).json({ responseMessage: 'failure' });
+    } catch (error) {
+      return res.status(500).json({ responseMessage: 'failure', responseData: error });
+    }
+  } catch (error) {
+    return res.status(500).json({ responseMessage: 'failure', responseData: error });
   }
 });
 

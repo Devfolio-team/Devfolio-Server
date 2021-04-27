@@ -102,3 +102,33 @@ exports.getUserInfo = async ({ user_id } = new UserDTO({})) => {
     console.error(error);
   }
 };
+
+exports.updateUserInfo = async ({
+  user_id,
+  email,
+  name,
+  nickname,
+  profilePhoto: { src },
+  githubUrl,
+  blogUrl,
+  introduce,
+}) => {
+  try {
+    const connection = await pool.getConnection(async conn => conn);
+    try {
+      const [
+        rows,
+      ] = await connection.query(
+        'UPDATE user SET email=(?), name=(?), nickname=(?), profile_photo=(?), github_url=(?), blog_url=(?), introduce=(?) WHERE user_id = (?) LIMIT 1',
+        [email, name, nickname, src, githubUrl, blogUrl, introduce, user_id]
+      );
+      connection.release();
+      return rows;
+    } catch (err) {
+      connection.release();
+      return 'Query Error';
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
