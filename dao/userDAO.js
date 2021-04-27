@@ -132,3 +132,19 @@ exports.updateUserInfo = async ({
     console.error(error);
   }
 };
+
+exports.deleteUserInfo = async ({ user_id }) => {
+  try {
+    const connection = await pool.getConnection(async conn => conn);
+    try {
+      const [rows] = await connection.query('DELETE FROM user WHERE user_id = (?) LIMIT 1', [user_id]);
+      connection.release();
+      return rows;
+    } catch (err) {
+      connection.release();
+      return 'Query Error';
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};

@@ -5,7 +5,13 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const jwt = require('jsonwebtoken');
 const githubAuthConfig = require('../.config/githubAuth');
 const googleAuthConfig = require('../.config/googleAuth');
-const { checkExistedUser, signupGoogle, signupGithub, getUserInfo } = require('../dao/userDAO');
+const {
+  checkExistedUser,
+  signupGoogle,
+  signupGithub,
+  getUserInfo,
+  deleteUserInfo,
+} = require('../dao/userDAO');
 const { getSkillsFromSpecificUser } = require('../dao/portfolioDAO');
 const { secretKey } = require('../.config/jwt');
 const { options } = require('../.config/jwt');
@@ -132,6 +138,16 @@ app.post('/signin', (req, res) => {
       res.status(500).json({ responseMessage: 'failure', error });
     }
   });
+});
+
+app.delete('/:user_id', async (req, res) => {
+  try {
+    const currentUser = await deleteUserInfo(req.params);
+
+    return res.status(200).json({ responseMessage: 'success', currentUser });
+  } catch (error) {
+    return res.status(500).json({ responseMessage: 'failure', error });
+  }
 });
 
 module.exports = app;
