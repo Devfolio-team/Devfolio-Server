@@ -6,6 +6,7 @@ const {
   getProjectLikeCount,
   getAuthorInfo,
   modifyProject,
+  deleteProject,
 } = require('../dao/projectDAO');
 
 const router = express.Router();
@@ -51,6 +52,17 @@ router.patch('/:project_id', async (req, res) => {
 
   try {
     const result = await modifyProject({ ...req.body, projectId: project_id });
+    res.status(200).json({ responseMessage: 'success', responseData: result });
+  } catch (error) {
+    res.send({ responseMessage: 'failure', responseData: null, error });
+  }
+});
+
+router.delete('/:project_id', async (req, res) => {
+  const { project_id } = req.params;
+
+  try {
+    const result = await deleteProject(project_id);
     res.status(200).json({ responseMessage: 'success', responseData: result });
   } catch (error) {
     res.send({ responseMessage: 'failure', responseData: null, error });

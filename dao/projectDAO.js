@@ -264,3 +264,21 @@ exports.modifyProject = async ({
     console.error(error);
   }
 };
+
+exports.deleteProject = async projectId => {
+  try {
+    const connection = await pool.getConnection(async conn => conn);
+    try {
+      const [rows] = await connection.query('DELETE FROM project WHERE project_id = (?) LIMIT 1', [
+        projectId,
+      ]);
+      connection.release();
+      return rows;
+    } catch (err) {
+      connection.release();
+      return 'Query Error';
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
