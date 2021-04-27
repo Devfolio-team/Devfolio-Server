@@ -185,3 +185,82 @@ exports.createProject = async ({
     console.error(error);
   }
 };
+
+exports.modifyProject = async ({
+  subject,
+  thumbnail: { src },
+  teamName,
+  planIntention,
+  startDate,
+  endDate,
+  githubUrl,
+  deployUrl,
+  isPrivate,
+  mainContents,
+  techStacks,
+  projectId,
+}) => {
+  try {
+    const connection = await pool.getConnection(async conn => conn);
+    try {
+      const [rows] = await connection.query(
+        `UPDATE project SET
+          subject=(?),
+          thumbnail=(?),
+          team_name=(?),
+          plan_intention=(?),
+          start_date=(?),
+          end_date=(?),
+          github_url=(?),
+          deploy_url=(?),
+          is_private=(?),
+          main_contents=(?)
+          WHERE project_id=(?) LIMIT 1`,
+        [
+          subject,
+          src,
+          teamName,
+          planIntention,
+          startDate,
+          endDate,
+          githubUrl,
+          deployUrl,
+          isPrivate,
+          mainContents,
+          projectId,
+        ]
+      );
+
+      const { affectedRows, serverStatus } = rows;
+
+      if (affectedRows && serverStatus === 2) {
+        if (techStacks[0]) {
+          try {
+            await connection.query('DELETE FROM project_tech_stacks WHERE project_project_id=(?) LIMIT 200', [
+              projectId,
+            ]);
+
+            const techStacksQuery = techStacks
+              .map(techStack => `,('${techStack}',${projectId})`)
+              .join('')
+              .slice(1);
+
+            await connection.query(
+              `INSERT INTO project_tech_stacks(tech_name, project_project_id) values ${techStacksQuery}`
+            );
+          } catch (error) {
+            connection.release();
+            return 'project_tech_stacks Query Error';
+          }
+        }
+      }
+      connection.release();
+      return rows;
+    } catch (err) {
+      connection.release();
+      return 'Project Insert Query Error';
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
