@@ -78,10 +78,8 @@ router.patch('/', async (req, res) => {
         try {
           await createSkillsToSpecificUser({ ...req.body, user_id });
 
-          const currentUser = await getUserInfo(req.query);
+          const [currentUser] = await getUserInfo(req.query);
           const currentUsersSkills = await getSkillsFromSpecificUser(req.query);
-
-          console.log(currentUsersSkills);
 
           return res.status(200).json({
             responseMessage: 'success',
