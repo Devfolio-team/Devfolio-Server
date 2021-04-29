@@ -112,6 +112,7 @@ exports.updateUserInfo = async ({
   githubUrl,
   blogUrl,
   introduce,
+  profileBackground,
 }) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
@@ -119,8 +120,8 @@ exports.updateUserInfo = async ({
       const [
         rows,
       ] = await connection.query(
-        'UPDATE user SET email=(?), name=(?), nickname=(?), profile_photo=(?), github_url=(?), blog_url=(?), introduce=(?) WHERE user_id = (?) LIMIT 1',
-        [email, name, nickname, src, githubUrl, blogUrl, introduce, user_id]
+        'UPDATE user SET email=(?), name=(?), nickname=(?), profile_photo=(?), github_url=(?), blog_url=(?), introduce=(?), profile_background = (?) WHERE user_id = (?) LIMIT 1',
+        [email, name, nickname, src, githubUrl, blogUrl, introduce, profileBackground, user_id]
       );
       connection.release();
       return rows;
