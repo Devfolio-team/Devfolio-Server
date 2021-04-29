@@ -206,7 +206,7 @@ exports.modifyProject = async ({
       const [rows] = await connection.query(
         `UPDATE project SET
           subject=(?),
-          thumbnail=(?),
+          ${src ? `thumbnail='${src}',` : ''}
           team_name=(?),
           plan_intention=(?),
           start_date=(?),
@@ -218,7 +218,6 @@ exports.modifyProject = async ({
           WHERE project_id=(?) LIMIT 1`,
         [
           subject,
-          src,
           teamName,
           planIntention,
           startDate,
