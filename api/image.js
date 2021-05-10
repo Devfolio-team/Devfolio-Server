@@ -21,6 +21,7 @@ router.post('/', (req, res) => {
         Key: files.image.name,
         ACL: 'public-read',
         Body: fs.createReadStream(files.image.path),
+        ContentType: type,
       };
 
       s3.upload(params, (err, data) => {
