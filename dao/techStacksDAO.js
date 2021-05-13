@@ -1,20 +1,6 @@
-const mysql = require('mysql2/promise');
-const dbconfig = require('../.config/database');
+const mysqlQuery = require('../utils/mysqlQuery');
 
-const pool = mysql.createPool(dbconfig);
+exports.fetchTechStacks = async () => await mysqlQuery('SELECT * FROM tech_stacks');
 
-exports.fetchTechStacks = async () => {
-  try {
-    const connection = await pool.getConnection(async conn => conn);
-    try {
-      const [rows] = await connection.query('SELECT * FROM tech_stacks');
-      connection.release();
-      return rows;
-    } catch (err) {
-      connection.release();
-      return 'Query Error';
-    }
-  } catch (error) {
-    console.error(error);
-  }
-};
+exports.requestTechStacks = async stackName =>
+  await mysqlQuery('INSERT INTO request_tech_stacks(stack_name) value((?))', [stackName]);
