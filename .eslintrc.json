@@ -28,6 +28,8 @@
     "prefer-template": "off",
     "no-nested-ternary": "off",
     "no-unused-vars": "warn",
+    "no-return-await": "off",
+    "implicit-arrow-linebreak":"off",
     "max-classes-per-file": "off",
     "consistent-return": "off",
     "no-restricted-syntax": ["off", "ForOfStatement"], // disallow specified syntax(ex. WithStatement)
