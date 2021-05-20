@@ -1,5 +1,5 @@
 const express = require('express');
-const { addComment, getComment, fetchComment, deleteComment } = require('../dao/commentDAO');
+const { addComment, getComment, fetchComment, deleteComment, editComment } = require('../dao/commentDAO');
 
 const router = express.Router();
 
@@ -18,6 +18,15 @@ router.get('/:project_id', async (req, res) => {
   try {
     const commentsData = await fetchComment(req.params.project_id);
     res.status(200).json({ responseMessage: 'success', commentsData });
+  } catch (error) {
+    res.status(500).json({ responseMessage: 'failure' });
+  }
+});
+
+router.patch('/', async (req, res) => {
+  const editResult = await editComment(req.body);
+  try {
+    res.status(200).json({ responseMessage: 'success', editResult });
   } catch (error) {
     res.status(500).json({ responseMessage: 'failure' });
   }

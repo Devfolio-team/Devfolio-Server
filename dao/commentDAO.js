@@ -37,3 +37,9 @@ exports.fetchComment = async projectId => {
 
 exports.deleteComment = async commentId =>
   await mysqlQuery('UPDATE comment SET is_deleted = 1 WHERE comment_id=(?) LIMIT 1', [commentId]);
+
+exports.editComment = async ({ contents, commentId, projectId, userId }) =>
+  await mysqlQuery(
+    'UPDATE comment SET contents = (?) WHERE comment_id=(?) and project_project_id=(?) and user_user_id=(?) LIMIT 1',
+    [contents, commentId, projectId, userId]
+  );
