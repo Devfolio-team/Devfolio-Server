@@ -1,5 +1,6 @@
 const mysql = require('mysql2/promise');
 const dbconfig = require('../.config/database');
+const mysqlQuery = require('../utils/mysqlQuery');
 
 const pool = mysql.createPool(dbconfig);
 
@@ -58,11 +59,10 @@ exports.getProjectTechStacks = async projectId => {
   try {
     const connection = await pool.getConnection(async conn => conn);
     try {
-      const [
-        rows,
-      ] = await connection.query('SELECT * FROM project_tech_stacks WHERE project_project_id = (?)', [
-        projectId,
-      ]);
+      const [rows] = await connection.query(
+        'SELECT * FROM project_tech_stacks WHERE project_project_id = (?)',
+        [projectId]
+      );
       connection.release();
       return rows;
     } catch (err) {
@@ -78,9 +78,7 @@ exports.getProjectLikeCount = async projectId => {
   try {
     const connection = await pool.getConnection(async conn => conn);
     try {
-      const [
-        rows,
-      ] = await connection.query(
+      const [rows] = await connection.query(
         'SELECT count(project_likes_id) as likeCount FROM project_likes WHERE project_project_id = (?)',
         [projectId]
       );
@@ -281,3 +279,9 @@ exports.deleteProject = async projectId => {
     console.error(error);
   }
 };
+
+exports.getFavoriteProject = async userId =>
+  await mysqlQuery(
+    'SELECT * FROM project WHERE project_id = ANY (SELECT project_project_id FROM project_likes WHERE user_user_id = (?))',
+    [userId]
+  );
