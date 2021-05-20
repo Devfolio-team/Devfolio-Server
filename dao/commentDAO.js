@@ -34,3 +34,6 @@ exports.fetchComment = async projectId => {
     })
   );
 };
+
+exports.deleteComment = async commentId =>
+  await mysqlQuery('UPDATE comment SET is_deleted = 1 WHERE comment_id=(?) LIMIT 1', [commentId]);
