@@ -43,3 +43,8 @@ exports.editComment = async ({ contents, commentId, projectId, userId }) =>
     'UPDATE comment SET contents = (?) WHERE comment_id=(?) and project_project_id=(?) and user_user_id=(?) LIMIT 1',
     [contents, commentId, projectId, userId]
   );
+
+exports.getProjectCommentCount = async projectId =>
+  await mysqlQuery('SELECT COUNT(comment_id) as commentCount FROM comment WHERE project_project_id=(?)', [
+    projectId,
+  ]);
