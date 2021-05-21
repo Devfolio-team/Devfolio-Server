@@ -282,6 +282,6 @@ exports.deleteProject = async projectId => {
 
 exports.getFavoriteProject = async userId =>
   await mysqlQuery(
-    'SELECT * FROM project WHERE project_id = ANY (SELECT project_project_id FROM project_likes WHERE user_user_id = (?))',
+    'SELECT * FROM project JOIN project_likes WHERE project_id = project_project_id and project_likes.user_user_id=(?) ORDER BY project_likes_id desc',
     [userId]
   );
