@@ -4,22 +4,23 @@ const mysqlQuery = require('../utils/mysqlQuery');
 
 const pool = mysql.createPool(dbconfig);
 
-// 기본 불러오기는 내림차순
-exports.fetchProjects = async () => {
-  try {
-    const connection = await pool.getConnection(async conn => conn);
-    try {
-      const [rows] = await connection.query('SELECT * FROM project ORDER BY project_id desc');
-      connection.release();
-      return rows;
-    } catch (err) {
-      connection.release();
-      return 'Query Error';
-    }
-  } catch (error) {
-    console.error(error);
-  }
-};
+// 작성한 순서 내림차순 (최신순 정렬)
+exports.fetchProjects = async ({ page, size }) =>
+  await mysqlQuery(
+    `SELECT project_id, subject, thumbnail, team_name, plan_intention, start_date, end_date, github_url, deploy_url, is_private, main_contents, created, project.user_user_id AS user_user_id, COUNT(project_likes.project_project_id) AS likeCount FROM project LEFT JOIN project_likes ON project.project_id = project_likes.project_project_id GROUP BY project_id ORDER BY project_id desc, project_id desc LIMIT ${
+      page * size
+    }, ${size}`,
+    []
+  );
+
+// 좋아요가 많은 순(인기순 정렬)
+exports.fetchPopularProjects = async ({ page, size }) =>
+  await mysqlQuery(
+    `SELECT project_id, subject, thumbnail, team_name, plan_intention, start_date, end_date, github_url, deploy_url, is_private, main_contents, created, project.user_user_id AS user_user_id, COUNT(project_likes.project_project_id) AS likeCount FROM project LEFT JOIN project_likes ON project.project_id = project_likes.project_project_id GROUP BY project_id ORDER BY likeCount desc, project_id desc LIMIT ${
+      page * size
+    }, ${size}`,
+    []
+  );
 
 exports.getProject = async project_id => {
   try {
@@ -280,8 +281,10 @@ exports.deleteProject = async projectId => {
   }
 };
 
-exports.getFavoriteProject = async userId =>
+exports.getFavoriteProject = async (userId, { page, limit }) =>
   await mysqlQuery(
-    'SELECT * FROM project JOIN project_likes WHERE project_id = project_project_id and project_likes.user_user_id=(?) ORDER BY project_likes_id desc',
+    `SELECT * FROM project JOIN project_likes WHERE project_id = project_project_id and project_likes.user_user_id=(?) ORDER BY project_likes_id desc LIMIT ${
+      page * limit
+    }, ${limit}`,
     [userId]
   );

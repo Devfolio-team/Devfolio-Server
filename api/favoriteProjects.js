@@ -5,7 +5,7 @@ const { getFavoriteProject, getAuthorInfo, getProjectLikeCount } = require('../d
 const router = express.Router();
 
 router.get('/:user_id', async (req, res) => {
-  const favoriteProjects = await getFavoriteProject(req.params.user_id);
+  const favoriteProjects = await getFavoriteProject(req.params.user_id, req.query);
 
   const projectsData = await Promise.all(
     favoriteProjects.map(async project => {

@@ -32,6 +32,8 @@
     "implicit-arrow-linebreak":"off",
     "max-classes-per-file": "off",
     "consistent-return": "off",
+    "operator-linebreak":"off",
+    "indent":"off",
     "no-restricted-syntax": ["off", "ForOfStatement"], // disallow specified syntax(ex. WithStatement)
     "prefer-arrow-callback": "error", // Require using arrow functions for callbacks
     "require-await": "off",
