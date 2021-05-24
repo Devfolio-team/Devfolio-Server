@@ -107,7 +107,7 @@ exports.createProject = async ({
   mainContents,
   userUserId,
   techStacks,
-  // teamMembers,
+  teamMembers,
 }) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
@@ -160,19 +160,17 @@ exports.createProject = async ({
             return 'project_tech_stacks Query Error';
           }
         }
-        // try {
-        //   const teamMembersQuery = teamMembers
-        //     // team_members는 배열로 넘어와야하고 member는 배열내에 존재하는 객체이다. 프로퍼티는 아래와 같이 2가지를 가지고 있어야한다.
-        //     .map(member => `,('${member.memberName}', '${member.memberGithubUrl}',${insertId})`)
-        //     .join('')
-        //     .slice(1);
-        //   await connection.query(
-        //     `INSERT INTO project_team_members(member_name, member_github_url, project_project_id) values ${teamMembersQuery}`
-        //   );
-        // } catch (error) {
-        //   connection.release();
-        //   return 'team_members Query Error';
-        // }
+
+        // teamMembers는 배열로 넘어와야하고 member는 배열내에 존재하는 객체이다. 프로퍼티는 아래와 같이 2가지를 가지고 있어야한다.
+        const teamMembersQuery = teamMembers
+          .map(member => `,('${member.memberName}', '${member.memberGithubUrl}', ${insertId})`)
+          .join('')
+          .slice(1);
+
+        await mysqlQuery(
+          `INSERT INTO project_team_members(member_name, member_github_url, project_project_id) values ${teamMembersQuery}`,
+          []
+        );
       }
       connection.release();
       return rows;
@@ -198,6 +196,7 @@ exports.modifyProject = async ({
   mainContents,
   techStacks,
   projectId,
+  teamMembers,
 }) => {
   try {
     const connection = await pool.getConnection(async conn => conn);
@@ -232,7 +231,7 @@ exports.modifyProject = async ({
       const { affectedRows, serverStatus } = rows;
 
       if (affectedRows && serverStatus === 2) {
-        if (techStacks[0]) {
+        if (techStacks.length) {
           try {
             await connection.query('DELETE FROM project_tech_stacks WHERE project_project_id=(?) LIMIT 200', [
               projectId,
@@ -245,6 +244,25 @@ exports.modifyProject = async ({
 
             await connection.query(
               `INSERT INTO project_tech_stacks(tech_name, project_project_id) values ${techStacksQuery}`
+            );
+          } catch (error) {
+            connection.release();
+            return 'project_tech_stacks Query Error';
+          }
+        }
+        if (teamMembers.length) {
+          try {
+            await connection.query('DELETE FROM project_team_members WHERE project_project_id=(?) LIMIT 10', [
+              projectId,
+            ]);
+
+            const teamMembersQuery = teamMembers
+              .map(member => `,('${member.memberName}', '${member.memberGithubUrl}', ${projectId})`)
+              .join('')
+              .slice(1);
+
+            await connection.query(
+              `INSERT INTO project_team_members(member_name, member_github_url, project_project_id) values ${teamMembersQuery}`
             );
           } catch (error) {
             connection.release();
