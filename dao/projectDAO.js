@@ -306,3 +306,6 @@ exports.getFavoriteProject = async (userId, { page, limit }) =>
     }, ${limit}`,
     [userId]
   );
+
+exports.getProjectTeamMembers = async projectId =>
+  await mysqlQuery('SELECT * FROM project_team_members WHERE project_project_id = (?)', [projectId]);
