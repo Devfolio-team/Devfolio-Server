@@ -19,13 +19,15 @@ router.get('/:project_id', async (req, res) => {
 
   try {
     const [projectData] = await getProject(project_id);
-    const authorInfo = await getAuthorInfo(projectData.user_user_id);
+    const [authorInfo] = await getAuthorInfo(projectData.user_user_id);
     const teamMembers = await getProjectTeamMembers(project_id);
     projectData.authorInfo = authorInfo;
     projectData.teamMembers = teamMembers;
     const [projectLikeCount] = await getProjectLikeCount(project_id);
     projectData.likeCount = projectLikeCount.likeCount;
     projectPageData = { projectData };
+
+    console.log(projectPageData);
     try {
       const projectTechStacks = await getProjectTechStacks(project_id);
       projectPageData = { ...projectPageData, projectTechStacks };
