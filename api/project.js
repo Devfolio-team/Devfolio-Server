@@ -26,8 +26,6 @@ router.get('/:project_id', async (req, res) => {
     const [projectLikeCount] = await getProjectLikeCount(project_id);
     projectData.likeCount = projectLikeCount.likeCount;
     projectPageData = { projectData };
-
-    console.log(projectPageData);
     try {
       const projectTechStacks = await getProjectTechStacks(project_id);
       projectPageData = { ...projectPageData, projectTechStacks };

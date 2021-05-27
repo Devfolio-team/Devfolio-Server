@@ -7,7 +7,6 @@ router.post('/', async (req, res) => {
   try {
     const { insertId } = await addComment(req.body);
     const commentData = await getComment(insertId);
-    console.log(commentData);
     res.status(200).json({ responseMessage: 'success', commentData });
   } catch (error) {
     res.status(500).json({ responseMessage: 'failure' });
