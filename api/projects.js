@@ -1,6 +1,11 @@
 const express = require('express');
 const { getProjectCommentCount } = require('../dao/commentDAO');
-const { fetchProjects, fetchPopularProjects, getAuthorInfo } = require('../dao/projectDAO');
+const {
+  fetchProjects,
+  fetchPopularProjects,
+  getAuthorInfo,
+  searchProjectBySubject,
+} = require('../dao/projectDAO');
 
 const router = express.Router();
 
@@ -25,6 +30,26 @@ router.get('/', async (req, res) => {
     res.status(200).json({ responseMessage: 'success', projectsData });
   } catch (error) {
     res.status(500).json({ responseMessage: 'failure', error });
+  }
+});
+
+router.get('/search', async (req, res) => {
+  try {
+    const projects = await searchProjectBySubject(req.query.q);
+    console.log(projects);
+
+    const projectsData = await Promise.all(
+      projects.map(async project => {
+        const [authorInfo] = await getAuthorInfo(project.user_user_id);
+        const [{ commentCount }] = await getProjectCommentCount(project.project_id);
+        const { nickname, profile_photo } = authorInfo;
+        return { ...project, nickname, profile_photo, commentCount };
+      })
+    );
+
+    res.status(200).json({ responseMessage: 'success', projectsData });
+  } catch (error) {
+    res.send({ responseMessage: 'failure', responseData: null, error });
   }
 });
 

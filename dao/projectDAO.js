@@ -309,3 +309,6 @@ exports.getFavoriteProject = async (userId, { page, limit }) =>
 
 exports.getProjectTeamMembers = async projectId =>
   await mysqlQuery('SELECT * FROM project_team_members WHERE project_project_id = (?)', [projectId]);
+
+exports.searchProjectBySubject = async q =>
+  await mysqlQuery(`SELECT * FROM project WHERE subject LIKE '%${q}%'`, []);
