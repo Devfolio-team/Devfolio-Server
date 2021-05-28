@@ -7,7 +7,7 @@ const pool = mysql.createPool(dbconfig);
 // 작성한 순서 내림차순 (최신순 정렬)
 exports.fetchProjects = async ({ page, size }) =>
   await mysqlQuery(
-    `SELECT project_id, subject, thumbnail, team_name, plan_intention, start_date, end_date, github_url, deploy_url, is_private, main_contents, created, project.user_user_id AS user_user_id, COUNT(project_likes.project_project_id) AS likeCount FROM project LEFT JOIN project_likes ON project.project_id = project_likes.project_project_id GROUP BY project_id ORDER BY project_id desc, project_id desc LIMIT ${
+    `SELECT project_id, subject, thumbnail, team_name, plan_intention, start_date, end_date, github_url, deploy_url, is_private, main_contents, created, project.user_user_id AS user_user_id, COUNT(project_likes.project_project_id) AS likeCount FROM project LEFT JOIN project_likes ON (project.project_id = project_likes.project_project_id) WHERE is_private=0 GROUP BY project_id ORDER BY project_id desc, project_id desc LIMIT ${
       page * size
     }, ${size}`,
     []
@@ -16,7 +16,7 @@ exports.fetchProjects = async ({ page, size }) =>
 // 좋아요가 많은 순(인기순 정렬)
 exports.fetchPopularProjects = async ({ page, size }) =>
   await mysqlQuery(
-    `SELECT project_id, subject, thumbnail, team_name, plan_intention, start_date, end_date, github_url, deploy_url, is_private, main_contents, created, project.user_user_id AS user_user_id, COUNT(project_likes.project_project_id) AS likeCount FROM project LEFT JOIN project_likes ON project.project_id = project_likes.project_project_id GROUP BY project_id ORDER BY likeCount desc, project_id desc LIMIT ${
+    `SELECT project_id, subject, thumbnail, team_name, plan_intention, start_date, end_date, github_url, deploy_url, is_private, main_contents, created, project.user_user_id AS user_user_id, COUNT(project_likes.project_project_id) AS likeCount FROM project LEFT JOIN project_likes ON (project.project_id = project_likes.project_project_id) WHERE is_private=0 GROUP BY project_id ORDER BY likeCount desc, project_id desc LIMIT ${
       page * size
     }, ${size}`,
     []
@@ -303,7 +303,7 @@ exports.deleteProject = async projectId => {
 
 exports.getFavoriteProject = async (userId, { page, limit }) =>
   await mysqlQuery(
-    `SELECT * FROM project JOIN project_likes WHERE project_id = project_project_id and project_likes.user_user_id=(?) ORDER BY project_likes_id desc LIMIT ${
+    `SELECT * FROM project JOIN project_likes WHERE project_id = project_project_id and project_likes.user_user_id=(?) and is_private=0 ORDER BY project_likes_id desc LIMIT ${
       page * limit
     }, ${limit}`,
     [userId]
@@ -313,7 +313,7 @@ exports.getProjectTeamMembers = async projectId =>
   await mysqlQuery('SELECT * FROM project_team_members WHERE project_project_id = (?)', [projectId]);
 
 exports.searchProjectBySubject = async q =>
-  await mysqlQuery(`SELECT * FROM project WHERE subject LIKE '%${q}%'`, []);
+  await mysqlQuery(`SELECT * FROM project WHERE subject LIKE '%${q}%' AND is_private=0`, []);
 
 exports.getAuthorUniqueId = async projectId =>
   await mysqlQuery('SELECT user_user_id FROM project WHERE project_id=(?)', [projectId]);

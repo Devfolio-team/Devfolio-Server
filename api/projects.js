@@ -5,6 +5,7 @@ const {
   fetchPopularProjects,
   getAuthorInfo,
   searchProjectBySubject,
+  getProjectLikeCount,
 } = require('../dao/projectDAO');
 
 const router = express.Router();
@@ -47,8 +48,9 @@ router.get('/search', async (req, res) => {
       projects.map(async project => {
         const [authorInfo] = await getAuthorInfo(project.user_user_id);
         const [{ commentCount }] = await getProjectCommentCount(project.project_id);
+        const [{ likeCount }] = await getProjectLikeCount(project.project_id);
         const { nickname, profile_photo } = authorInfo;
-        return { ...project, nickname, profile_photo, commentCount };
+        return { ...project, nickname, profile_photo, likeCount, commentCount };
       })
     );
 
