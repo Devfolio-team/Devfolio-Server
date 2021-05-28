@@ -34,8 +34,14 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/search', async (req, res) => {
+  const { q } = req.query;
+  if (q === '' || q === ' ') {
+    res.end();
+    return;
+  }
+
   try {
-    const projects = await searchProjectBySubject(req.query.q);
+    const projects = await searchProjectBySubject(q);
     console.log(projects);
 
     const projectsData = await Promise.all(
