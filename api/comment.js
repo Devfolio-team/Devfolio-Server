@@ -47,7 +47,6 @@ router.delete('/:comment_id', (req, res) => {
   jwtVerify(req, res, async ({ user_id: currentUserId }) => {
     const { comment_id } = req.params;
     const [{ commentAuthorId }] = await getCommentAuthorUniqueId(comment_id);
-    console.log(commentAuthorId);
     if (commentAuthorId === currentUserId) {
       const deleteResult = await deleteComment(comment_id);
       res.status(200).json({ responseMessage: 'success', deleteResult });

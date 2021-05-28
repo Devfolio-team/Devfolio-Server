@@ -124,7 +124,6 @@ app.get(
 );
 
 app.post('/signin', (req, res) => {
-  console.log(req.headers);
   const { authorization } = req.headers;
   jwt.verify(authorization, secretKey, async (err, decoded) => {
     try {
