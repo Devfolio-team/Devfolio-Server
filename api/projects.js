@@ -42,7 +42,6 @@ router.get('/search', async (req, res) => {
 
   try {
     const projects = await searchProjectBySubject(q);
-    console.log(projects);
 
     const projectsData = await Promise.all(
       projects.map(async project => {

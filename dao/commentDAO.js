@@ -48,3 +48,6 @@ exports.getProjectCommentCount = async projectId =>
   await mysqlQuery('SELECT COUNT(comment_id) as commentCount FROM comment WHERE project_project_id=(?)', [
     projectId,
   ]);
+
+exports.getCommentAuthorUniqueId = async commentId =>
+  await mysqlQuery('SELECT user_user_id as commentAuthorId FROM comment WHERE comment_id=(?)', [commentId]);

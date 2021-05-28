@@ -196,6 +196,7 @@ exports.modifyProject = async ({
   mainContents,
   techStacks,
   projectId,
+  currentUserId,
   teamMembers,
 }) => {
   try {
@@ -213,7 +214,7 @@ exports.modifyProject = async ({
           deploy_url=(?),
           is_private=(?),
           main_contents=(?)
-          WHERE project_id=(?) LIMIT 1`,
+          WHERE project_id=(?) AND user_user_id=(?) LIMIT 1`,
         [
           subject,
           teamName,
@@ -225,6 +226,7 @@ exports.modifyProject = async ({
           isPrivate,
           mainContents,
           projectId,
+          currentUserId,
         ]
       );
 
@@ -312,3 +314,6 @@ exports.getProjectTeamMembers = async projectId =>
 
 exports.searchProjectBySubject = async q =>
   await mysqlQuery(`SELECT * FROM project WHERE subject LIKE '%${q}%'`, []);
+
+exports.getAuthorUniqueId = async projectId =>
+  await mysqlQuery('SELECT user_user_id FROM project WHERE project_id=(?)', [projectId]);

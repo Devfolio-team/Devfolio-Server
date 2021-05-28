@@ -8,6 +8,7 @@ const {
 } = require('../dao/portfolioDAO');
 const { getAuthorInfo, getProjectLikeCount } = require('../dao/projectDAO');
 const { getUserInfo, updateUserInfo } = require('../dao/userDAO');
+const jwtVerify = require('../utils/jwtVerify');
 
 const router = express.Router();
 
@@ -59,45 +60,46 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.patch('/', async (req, res) => {
-  const { user_id } = req.query;
+router.patch('/', (req, res) => {
+  jwtVerify(req, res, async ({ user_id: currentUserId }) => {
+    const { user_id } = req.query;
+    if (currentUserId === +user_id) {
+      const updateResult = await updateUserInfo({ ...req.body, user_id });
 
-  try {
-    const updateResult = await updateUserInfo({ ...req.body, user_id });
-
-    if (!updateResult.affectedRows) {
-      res.status(400).json({
-        responseMessage: 'failure',
-        responseData: 'The user with the requested id does not exist.',
-      });
-      return;
-    }
-
-    try {
-      const { serverStatus } = await deleteSkillsFromSpecificUser(req.query);
-
-      if (serverStatus === 2) {
-        try {
-          await createSkillsToSpecificUser({ ...req.body, user_id });
-
-          const [currentUser] = await getUserInfo(req.query);
-          const currentUsersSkills = await getSkillsFromSpecificUser(req.query);
-
-          return res.status(200).json({
-            responseMessage: 'success',
-            currentUser: { ...currentUser, currentUsersSkills },
-          });
-        } catch (error) {
-          return res.status(500).json({ responseMessage: 'failure', responseData: error });
-        }
+      if (!updateResult.affectedRows) {
+        res.status(400).json({
+          responseMessage: 'failure',
+          responseData: 'The user with the requested id does not exist.',
+        });
+        return;
       }
-      return res.status(500).json({ responseMessage: 'failure' });
-    } catch (error) {
-      return res.status(500).json({ responseMessage: 'failure', responseData: error });
+
+      try {
+        const { serverStatus } = await deleteSkillsFromSpecificUser(req.query);
+
+        if (serverStatus === 2) {
+          try {
+            await createSkillsToSpecificUser({ ...req.body, user_id });
+
+            const [currentUser] = await getUserInfo(req.query);
+            const currentUsersSkills = await getSkillsFromSpecificUser(req.query);
+
+            return res.status(200).json({
+              responseMessage: 'success',
+              currentUser: { ...currentUser, currentUsersSkills },
+            });
+          } catch (error) {
+            return res.status(500).json({ responseMessage: 'failure', responseData: error });
+          }
+        }
+        return res.status(500).json({ responseMessage: 'failure' });
+      } catch (error) {
+        return res.status(500).json({ responseMessage: 'failure', responseData: error });
+      }
+    } else {
+      res.status(401).json({ responseMessage: 'Warning! Use only your own tokens' });
     }
-  } catch (error) {
-    return res.status(500).json({ responseMessage: 'failure', responseData: error });
-  }
+  });
 });
 
 module.exports = router;
