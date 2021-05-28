@@ -124,8 +124,9 @@ app.get(
 );
 
 app.post('/signin', (req, res) => {
-  const { authentication } = req.body;
-  jwt.verify(authentication, secretKey, async (err, decoded) => {
+  console.log(req.headers);
+  const { authorization } = req.headers;
+  jwt.verify(authorization, secretKey, async (err, decoded) => {
     try {
       const [currentUser] = await getUserInfo(decoded);
 
